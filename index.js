@@ -32,7 +32,7 @@ async function main() {
     const envVars = dotenv.config({ path: envFile }).parsed;
 
     if (!name) {
-        name = envVars['NAME_DEPLOY'] || require(path.join(process.cwd(), './package.json')).name;
+        name = envVars['NAME_DEPLOY'] || require(Path.join(process.cwd(), './package.json')).name;
     }
 
     if (!host) {
@@ -40,7 +40,7 @@ async function main() {
     }
 
     if (!projectType) {
-        projectType = fs.existsSync(path.join(process.cwd(), './next.config.js')) ? 'nextjs' : require(path.join(process.cwd(), './package.json')).dependencies['@nestjs/core'] ? 'nestjs' : 'nodejs';
+        projectType = fs.existsSync(Path.join(process.cwd(), './next.config.js')) ? 'nextjs' : require(Path.join(process.cwd(), './package.json')).dependencies['@nestjs/core'] ? 'nestjs' : 'nodejs';
     }
 
     if (!port) {
@@ -49,7 +49,7 @@ async function main() {
         if (!port) {
             if (projectType === 'nextjs') {
                 // in package.json look for "start": "next start -p 9093" and get the port only
-                const packageJson = require(path.join(process.cwd(), './package.json'));
+                const packageJson = require(Path.join(process.cwd(), './package.json'));
                 const nextStartScript = packageJson.scripts.start;
                 const match = nextStartScript.match(/-p (\d+)/);
                 if (match) {
@@ -227,7 +227,7 @@ CMD ["node", "server.js"]
             fs.appendFileSync('.gitignore', 'start.sh\n');
         }
 
-        const rootFolder = './';
+        const rootFolder = Path.join(process.cwd(), './');
 
 
         // Write the updated Dockerfile
