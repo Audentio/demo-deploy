@@ -223,6 +223,11 @@ CMD ["node", "server.js"]
             console.log('appending start.sh to .gitignore');
             fs.appendFileSync('.gitignore', 'start.sh\n');
         }
+        if (!gitignorefile.includes('.env.deploy')) {
+            console.log('appending .env.deploy to .gitignore');
+            fs.appendFileSync('.gitignore', '.env.deploy\n');
+        }
+
 
         const rootFolder = Path.join(process.cwd(), './');
 
