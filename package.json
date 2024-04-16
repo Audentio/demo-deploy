@@ -1,6 +1,6 @@
 {
   "name": "deployz",
-  "version": "1.0.7",
+  "version": "1.0.8",
   "description": "Deploy your app to audentio's cloud with a single command",
   "main": "index.js",
   "repository": {

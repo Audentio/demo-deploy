@@ -124,7 +124,7 @@ RUN npm run build
 
 EXPOSE ${port}
 
-CMD ["npm", "run", "start]
+CMD ["npm", "run", "start"]
 `;
 
         // Dockerfile for nestjs
@@ -248,6 +248,12 @@ CMD ["node", "server.js"]
         const packageJson = require(Path.join(process.cwd(), './package.json'));
         if (!packageJson.scripts.build) {
             dockerFile = dockerFile.replace('RUN npm run build', '# RUN npm run build');
+        }
+
+        // if package.json does not have a start command, change "CMD ["npm", "run", "start"]" command in the Dockerfile "CMD ["node", "."]"
+
+        if (!packageJson.scripts.start) {
+            dockerFile = dockerFile.replace('CMD ["npm", "run", "start"]', 'CMD ["node", "."]');
         }
 
         // Insert each environment variable at the specified location in the Dockerfile
