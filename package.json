@@ -1,6 +1,6 @@
 {
   "name": "deployz",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Deploy your app to audentio's cloud with a single command",
   "main": "index.js",
   "repository": {
@@ -13,7 +13,7 @@
     "cloud"
   ],
   "bin": {   
-    "deployit": "./index.js"
+    "deployz": "./index.js"
 },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
