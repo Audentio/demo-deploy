@@ -13,7 +13,8 @@
     "cloud"
   ],
   "bin": {   
-    "deployz": "./index.js"
+    "deployz": "./index.js",
+    "deployit": "./index.js"
 },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",

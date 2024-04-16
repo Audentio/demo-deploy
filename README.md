@@ -4,8 +4,6 @@
 
 ```bash
     npm install -g deployz
-    or
-    npx deployz
 ```
 
 
@@ -29,14 +27,14 @@ NAME_DEPLOY=myapp
 
 ```
 
-### run the deploy script
+### run the deploy command from your terminal
 
-```bash
-npx deployit
+```shell
+user:~$ deployit
 ```
 
 
-Done! Your app is now deployed to the cloud. You can access it at `https://myapp.audent.ai`
+Done! Your app is now deployed to `https://myapp.audent.ai`
 
 
 # NOTES
