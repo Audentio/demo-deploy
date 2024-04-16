@@ -1,11 +1,11 @@
 {
   "name": "deployz",
-  "version": "1.0.9",
+  "version": "1.0.10",
   "description": "Deploy your app to audentio's cloud with a single command",
   "main": "index.js",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/Bahlinc-Dev/deployit.git"
+    "url": "git+https://github.com/Audentio/demo-deploy.git"
   },
   "keywords": [
     "deploy",
