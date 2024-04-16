@@ -1,7 +1,17 @@
 # Deploy Apps to Audentio's Cloud
 
+## Install deployz
 
-### create an .env.deploy file in the root of your project with the following content:
+```bash
+    npm install -g deployz
+    or
+    npx deployz
+```
+
+
+
+
+### Create an   **.env.deploy**   file in the root of your project:
 
 ```bash
 ##############################################
@@ -27,4 +37,15 @@ npx deployit
 
 
 Done! Your app is now deployed to the cloud. You can access it at `https://myapp.audent.ai`
+
+
+# NOTES
+
+
+- assumes a non-nextjs or non-nestjs nodejs app starts with ```npm run start```
+-  will auto detect nextjs and nestjs aps and deploy them accordingly
+
+-  will auto detect the port of the app if not provided in the env.deploy file, or default to 3000
+-  will auto detect the host of the app if not provided in the .env.deploy file, or default to package.json name
+- will auto detect the name of the app if not provided in the .env.deploy file, or default to package.json name
 

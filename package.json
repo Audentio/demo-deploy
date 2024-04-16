@@ -1,6 +1,6 @@
 {
-  "name": "deployit",
-  "version": "1.0.0",
+  "name": "deployz",
+  "version": "1.0.1",
   "description": "Deploy your app to audentio's cloud with a single command",
   "main": "index.js",
   "repository": {
@@ -13,12 +13,11 @@
     "cloud"
   ],
   "bin": {   
-    "get-set-node-oss": "node ./index.js",
     "deployit": "./index.js"
 },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node index.js"
+    "start": "node ./index.js"
   },
   "author": "Henry Bahl",
   "license": "MIT",
