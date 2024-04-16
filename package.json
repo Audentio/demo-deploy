@@ -13,7 +13,8 @@
     "cloud"
   ],
   "bin": {   
-    "get-set-node-oss": "start"
+    "get-set-node-oss": "node ./index.js",
+    "deployit": "./index.js"
 },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
