@@ -110,9 +110,6 @@ async function main() {
         let dockerfileNodeJS = `# Dockerfile
 FROM node:20-alpine
 
-# Install Git
-RUN apk add --no-cache git
-
 WORKDIR /usr/src/app
 
 COPY package*.json ./
@@ -244,6 +241,13 @@ CMD ["node", "server.js"]
             case 'nodejs':
                 dockerFile = dockerfileNodeJS;
                 break;
+        }
+
+        // if package.json does not have a build command, comment out the build command in the Dockerfile "RUN npm run build"
+
+        const packageJson = require(Path.join(process.cwd(), './package.json'));
+        if (!packageJson.scripts.build) {
+            dockerFile = dockerFile.replace('RUN npm run build', '# RUN npm run build');
         }
 
         // Insert each environment variable at the specified location in the Dockerfile
