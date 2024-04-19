@@ -642,7 +642,7 @@ function createPHPDeployFiles() {
         fs.mkdirSync(Path.join(deployItFolder, 'server/etc/php/php-fpm.d'));
     }
 
-    const nginxConf = `
+    const nginxConf = String.raw`
 worker_processes 1;
 error_log stderr warn;
 pid /run/nginx.pid;
@@ -780,7 +780,7 @@ http {
     }
 
 
-    const nginxDefaultConf = `server {
+    const nginxDefaultConf = String.raw`server {
     index index.php index.html index.htm;
     listen 80;
     listen [::]:80;
@@ -805,7 +805,7 @@ http {
 
 
 
-    const phpFPMConf = `[global]
+    const phpFPMConf = String.raw`[global]
 ; Log to stderr
 error_log = /dev/stderr
 
@@ -871,7 +871,7 @@ ping.path = /fpm-ping
     }
 
 
-    const phpINI = `
+    const phpINI = String.raw`
 [PHP]
 file_uploads = On
 upload_max_filesize = 256M
@@ -913,7 +913,7 @@ opcache.jit=1255
     }
 
 
-    const wwwConf = `[global]
+    const wwwConf = String.raw`[global]
 ; Log to stderr
 error_log = /dev/stderr
 
@@ -980,7 +980,7 @@ ping.path = /fpm-ping
 
 
 
-    const supervisordconf = `[supervisord]
+    const supervisordconf = String.raw`[supervisord]
 nodaemon=true
 logfile=/dev/null
 logfile_maxbytes=0
