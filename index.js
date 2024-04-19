@@ -170,7 +170,7 @@ async function main() {
 
 
 
-        const dockerBuild = spawn('docker', ['build', '-t', name, '-f', Path.join(deployItFolder, 'Dockerfile'), '.']);
+        const dockerBuild = spawn('docker', ['build', '--platform', 'linux/amd64', '-t', name, '-f', Path.join(deployItFolder, 'Dockerfile'), '.']);
 
         dockerBuild.stdout.on('data', (data) => {
             console.log(`${data}`);
@@ -404,7 +404,7 @@ CMD ["node", "server.js"]
 
     // Dockerfile for php project
     const PHP_VERSION = '8.0.30-r0';
-    let dockerfilePHP = `FROM php:8.1-fpm-alpine3.17
+    let dockerfilePHP = `FROM php:8.2.18-fpm-alpine
 
 # https://github.com/wp-cli/wp-cli/issues/3840
 ENV PAGER="more"
@@ -412,42 +412,14 @@ ENV PAGER="more"
 RUN apk update && apk upgrade
 RUN apk add bash
 
-RUN apk --no-cache add php81 \
-php81-ctype \
-php81-curl \
-php81-dom \
-php81-exif \
-php81-fileinfo \
-php81-fpm \
-php81-gd \
-php81-iconv \
-php81-intl \
-php81-mbstring \
-php81-mysqli \
-php81-opcache \
-php81-openssl \
-php81-pecl-imagick \
-php81-pecl-redis \
-php81-phar \
-php81-session \
-php81-simplexml \
-php81-soap \
-php81-xml \
-php81-xmlreader \
-php81-zip \
-php81-zlib \
-php81-pdo \
-php81-xmlwriter \
-php81-tokenizer \
-php81-pdo_mysql \
-nginx supervisor curl tzdata htop mysql-client dcron
+RUN apk add --no-cache nginx supervisor curl tzdata htop mysql-client dcron
+RUN apk --no-cache add  php82 php82-sqlite3 php82-ctype php82-curl php82-dom php82-exif php82-fileinfo php82-fpm php82-gd php82-iconv php82-intl php82-mbstring php82-mysqli php82-opcache php82-openssl php82-pecl-imagick php82-pecl-redis php82-phar php82-session php82-simplexml php82-soap php82-xml php82-xmlreader php82-zip php82-zlib php82-pdo php82-xmlwriter php82-tokenizer php82-pdo_mysql
+RUN apk add --update php-pdo_sqlite
 
-#COPY .deploy-it-files/server/etc/nginx /etc/nginx
-#COPY .deploy-it-files/server/etc/php /etc/php8
-#COPY src /usr/share/nginx/html
-#RUN mkdir /var/run/php
-#EXPOSE 80
+RUN apk add nodejs npm
 
+RUN node --version
+RUN npm --version
 
 # Install PHP tools
 RUN curl -O https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar && chmod +x wp-cli.phar && mv wp-cli.phar /usr/local/bin/wp
@@ -464,6 +436,7 @@ COPY .deploy-it-files/server/etc/php/php.ini /etc/php8/conf.d/custom.ini
 # Configure supervisord
 COPY .deploy-it-files/server/etc/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 
+
 # Setup document root
 RUN mkdir -p /var/www/html
 
@@ -473,10 +446,7 @@ RUN chown -R nobody.nobody /var/www/html && \
   chown -R nobody.nobody /var/lib/nginx && \
   chown -R nobody.nobody /var/log/nginx
 
-RUN chown -R nobody.nobody /var/log/php81
-
-# Switch to use a non-root user from here on
-USER nobody
+RUN chown -R nobody.nobody /var/log/php82
 
 # Add application
 WORKDIR /var/www/html
@@ -488,6 +458,9 @@ RUN composer install
 # Run npm install and build
 RUN npm install
 RUN npm run build
+
+# Switch to use a non-root user from here on
+USER nobody
 
 # ADDITIONAL RUN COMMANDS HERE
 
@@ -711,7 +684,7 @@ http {
 
         sendfile off;
 
-        root /var/www/html;
+        root /var/www/html/public;
         index index.php index.html;
         
         # Add support for "WebP Converter for Media" WordPress plugin
@@ -1016,7 +989,7 @@ logfile_maxbytes=0
 pidfile=/run/supervisord.pid
 
 [program:php-fpm]
-command=php-fpm81 -F
+command=php-fpm82 -F
 stdout_logfile=/dev/stdout
 stdout_logfile_maxbytes=0
 stderr_logfile=/dev/stderr
