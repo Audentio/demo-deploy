@@ -82,10 +82,13 @@ async function main() {
             entryPointFolder = './public';
         }
 
-        if (fs.existsSync(rootFolder, './src/index.php')) {
-            projectType = 'php';
-            entryPointFolder = './src';
+        if (!projectType) {
+            if (fs.existsSync(rootFolder, './src/index.php')) {
+                projectType = 'php';
+                entryPointFolder = './src';
+            }
         }
+
 
         if (projectType === 'php') {
             createPHPDeployFiles();
@@ -454,6 +457,7 @@ COPY --chown=nobody ${entryPointFolder}/ /var/www/html/
 
 # Run Composer install
 RUN composer install
+RUN php artisan migrate
 
 # Run npm install and build
 RUN npm install
@@ -548,7 +552,7 @@ HEALTHCHECK --timeout=10s CMD curl --silent --fail http://127.0.0.1:8080/fpm-pin
     dockerFile = dockerFile.replace('# Set environment variables here', envVarsString);
 
 
-    
+
     if (!fs.existsSync(Path.join(deployItFolder, 'Dockerfile'))) {
         fs.writeFileSync(Path.join(deployItFolder, 'Dockerfile'), dockerFile);
     } else {
@@ -684,25 +688,14 @@ http {
 
         sendfile off;
 
-        root /var/www/html/public;
-        index index.php index.html;
-        
-        # Add support for "WebP Converter for Media" WordPress plugin
-        # https://wordpress.org/plugins/webp-converter-for-media/
-        location ~ ^/wp-content/(?<path>.+)\.(?<ext>jpe?g|png|gif)$ {
-            if ($http_accept !~* "image/webp") {
-                break;
-            }
+        index index.html index.htm index.php;
 
-            expires 180d;
-            add_header Vary Accept;
-            try_files /wp-content/uploads-webpc/$path.$ext.webp $uri =404;
-        }
+        charset utf-8;
+
+        root /var/www/html/public;
 
         location / {
-            # First attempt to serve request as file, then
-            # as directory, then fall back to index.php
-            try_files $uri $uri/ /index.php?$args;
+            try_files $uri $uri/ /index.php?$query_string;
         }
 
         # Redirect server error pages to the static page /50x.html
@@ -710,6 +703,11 @@ http {
         location = /50x.html {
             root /var/lib/nginx/html;
         }
+
+        location = /favicon.ico { access_log off; log_not_found off; }
+        location = /robots.txt  { access_log off; log_not_found off; }
+    
+        error_page 404 /index.php;
 
         # Pass the PHP scripts to PHP-FPM listening on 127.0.0.1:9000
         location ~ \.php$ {
@@ -735,8 +733,7 @@ http {
         }
 
         # Deny access to . files, for security
-        location ~ /\. {
-            log_not_found off;
+        location ~ /\.(?!well-known).* {
             deny all;
         }
 
