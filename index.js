@@ -67,8 +67,17 @@ async function main() {
             entryPointFolder = './';
             projectType = 'php';
         }
+        if (fs.existsSync(rootFolder, './artisan')) {
+            entryPointFolder = './';
+            projectType = 'php';
+        }
 
-        if(fs.existsSync(rootFolder, './public/index.php')) {
+        if (fs.existsSync(rootFolder, './composer.json')) {
+            entryPointFolder = './';
+            projectType = 'php';
+        }
+
+        if (fs.existsSync(rootFolder, './public/index.php')) {
             projectType = 'php';
             entryPointFolder = './public';
         }
@@ -473,6 +482,15 @@ USER nobody
 WORKDIR /var/www/html
 COPY --chown=nobody ${entryPointFolder}/ /var/www/html/
 
+# Run Composer install
+RUN composer install
+
+# Run npm install and build
+RUN npm install
+RUN npm run build
+
+# ADDITIONAL RUN COMMANDS HERE
+
 # Expose the port nginx is reachable on
 EXPOSE 8080
 
@@ -538,6 +556,12 @@ HEALTHCHECK --timeout=10s CMD curl --silent --fail http://127.0.0.1:8080/fpm-pin
         dockerFile = dockerFile.replace('RUN npm run build', '# RUN npm run build');
     }
 
+    // if there is no composer.json file, comment out the composer install command in the Dockerfile "RUN composer install"
+
+    if (!fs.existsSync(Path.join(rootFolder, 'composer.json'))) {
+        dockerFile = dockerFile.replace('RUN composer install', '# RUN composer install');
+    }
+
     // if package.json does not have a start command, change "CMD ["npm", "run", "start"]" command in the Dockerfile "CMD ["node", "."]"
 
     if (!packageJson.scripts.start) {
@@ -551,7 +575,13 @@ HEALTHCHECK --timeout=10s CMD curl --silent --fail http://127.0.0.1:8080/fpm-pin
     dockerFile = dockerFile.replace('# Set environment variables here', envVarsString);
 
 
-    fs.writeFileSync(Path.join(deployItFolder, 'Dockerfile'), dockerFile);
+    
+    if (!fs.existsSync(Path.join(deployItFolder, 'Dockerfile'))) {
+        fs.writeFileSync(Path.join(deployItFolder, 'Dockerfile'), dockerFile);
+    } else {
+        console.log('Dockerfile already exists, delete it if you want to recreate it');
+    }
+
 }
 
 function createStartSh() {
@@ -605,6 +635,7 @@ function createDatabaseJs() {
 
 function createPHPDeployFiles() {
     // create nginx.conf file
+    console.log('Creating PHP deploy files... \n')
 
     // recursivly create the folder deployItFolder/server/etc/nginx/conf.d
     // and recursivly create the folder deployItFolder/server/etc/php/php-fpm.d
@@ -770,7 +801,13 @@ http {
 }
 `;
 
-    fs.writeFileSync(Path.join(deployItFolder, 'server/etc/nginx/nginx.conf'), nginxConf);
+    if (!fs.existsSync(Path.join(deployItFolder, 'server/etc/nginx/nginx.conf'))) {
+        console.log('creating nginx.conf file');
+        fs.writeFileSync(Path.join(deployItFolder, 'server/etc/nginx/nginx.conf'), nginxConf);
+    } else {
+        console.log('nginx.conf file already exists, delete it if you want to recreate it');
+    }
+
 
     const nginxDefaultConf = `server {
     index index.php index.html index.htm;
@@ -788,7 +825,13 @@ http {
 }
 `;
 
-    fs.writeFileSync(Path.join(deployItFolder, 'server/etc/nginx/conf.d/default.conf'), nginxDefaultConf);
+    if (!fs.existsSync(Path.join(deployItFolder, 'server/etc/nginx/conf.d/default.conf'))) {
+        console.log('creating default.conf file');
+        fs.writeFileSync(Path.join(deployItFolder, 'server/etc/nginx/conf.d/default.conf'), nginxDefaultConf);
+    } else {
+        console.log('default.conf file already exists, delete it if you want to recreate it');
+    }
+
 
 
     const phpFPMConf = `[global]
@@ -849,7 +892,13 @@ decorate_workers_output = no
 ping.path = /fpm-ping
 `
 
-    fs.writeFileSync(Path.join(deployItFolder, 'server/etc/php/php-fpm.conf'), phpFPMConf);
+    if (!fs.existsSync(Path.join(deployItFolder, 'server/etc/php/php-fpm.conf'))) {
+        console.log('creating php-fpm.config file');
+        fs.writeFileSync(Path.join(deployItFolder, 'server/etc/php/php-fpm.conf'), phpFPMConf);
+    } else {
+        console.log('php-fpm.conf file already exists, delete it if you want to recreate it');
+    }
+
 
     const phpINI = `
 [PHP]
@@ -885,7 +934,13 @@ opcache.jit=1255
 #opcache.jit_debug=1048576
 `;
 
-    fs.writeFileSync(Path.join(deployItFolder, 'server/etc/php/php.ini'), phpINI);
+    if (!fs.existsSync(Path.join(deployItFolder, 'server/etc/php/php.ini'))) {
+        console.log('creating php.ini file');
+        fs.writeFileSync(Path.join(deployItFolder, 'server/etc/php/php.ini'), phpINI);
+    } else {
+        console.log('php.ini file already exists, delete it if you want to recreate it');
+    }
+
 
     const wwwConf = `[global]
 ; Log to stderr
@@ -945,7 +1000,13 @@ decorate_workers_output = no
 ping.path = /fpm-ping
 `;
 
-    fs.writeFileSync(Path.join(deployItFolder, 'server/etc/php/php-fpm.d/www.conf'), wwwConf);
+    if (!fs.existsSync(Path.join(deployItFolder, 'server/etc/php/php-fpm.d/www.conf'))) {
+        console.log('creating www.conf file');
+        fs.writeFileSync(Path.join(deployItFolder, 'server/etc/php/php-fpm.d/www.conf'), wwwConf);
+    } else {
+        console.log('www.conf file already exists, delete it if you want to recreate it');
+    }
+
 
 
     const supervisordconf = `[supervisord]
@@ -973,7 +1034,13 @@ autorestart=false
 startretries=0
 `
 
-    fs.writeFileSync(Path.join(deployItFolder, 'server/etc/supervisord.conf'), supervisordconf);
+    if (!fs.existsSync(Path.join(deployItFolder, 'server/etc/supervisord.conf'))) {
+        console.log('creating supervisord.conf file');
+        fs.writeFileSync(Path.join(deployItFolder, 'server/etc/supervisord.conf'), supervisordconf);
+    } else {
+        console.log('supervisord.conf file already exists, delete it if you want to recreate it');
+    }
+
 
 
 }
