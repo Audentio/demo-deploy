@@ -454,7 +454,7 @@ RUN chown -R nobody.nobody /var/log/php82
 
 # Add application
 WORKDIR /var/www/html
-COPY --chown=nobody ${entryPointFolder}/ /var/www/html/
+COPY --chown=nobody ${entryPointFolder} /var/www/html/
 
 # Run Composer install
 RUN composer install
