@@ -76,10 +76,11 @@ async function main() {
             entryPointFolder = './';
             projectType = 'php';
         }
-
-        if (fs.existsSync(rootFolder, './public/index.php')) {
-            projectType = 'php';
-            entryPointFolder = './public';
+        if (!projectType) {
+            if (fs.existsSync(rootFolder, './public/index.php')) {
+                projectType = 'php';
+                entryPointFolder = './public';
+            }
         }
 
         if (!projectType) {
