@@ -657,9 +657,9 @@ http {
 
     # Define custom log format to include reponse times
     log_format main_timed '$remote_addr - $remote_user [$time_local] "$request" '
-                          '$status $body_bytes_sent "$http_referer" '
-                          '"$http_user_agent" "$http_x_forwarded_for" '
-                          '$request_time $upstream_response_time $pipe $upstream_cache_status';
+                            '$status $body_bytes_sent "$http_referer" '
+                            '"$http_user_agent" "$http_x_forwarded_for" '
+                            '$request_time $upstream_response_time $pipe $upstream_cache_status';
 
     access_log /dev/stdout main_timed;
     error_log /dev/stderr notice;
