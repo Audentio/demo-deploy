@@ -4,6 +4,7 @@ const dotenv = require('dotenv');
 const fs = require('fs');
 const Path = require('path');
 const { exec, spawn } = require('child_process');
+const package = require('./package.json');
 
 
 // CONFIGURATION, EDIT THESE VALUES
@@ -31,7 +32,35 @@ async function main() {
 
     // check if  .env.deploy exists
     if (!fs.existsSync('.env.deploy')) {
-        console.error('Please create a .env.deploy file with the necessary environment variables');
+        const envExample = `##############################################
+# deployment vars for the deployit.js script
+# deploy an instance to kubernetes running with rancher at audent.ai
+##############################################
+
+# these will override any calculated values
+PORT_DEPLOY=
+HOST_DEPLOY=
+NAME_DEPLOY=
+STORAGE_DEPLOY=
+
+# API KEY IS REQUIRED to deploy to the remote server
+API_KEY_DEPLOY=`
+
+    // Write the envExample to .env.deploy
+    fs.writeFileSync('.env.deploy', envExample, (err) => {
+        if (err) {
+            console.error('Failed to create .env.deploy file', err);
+            process.exit(1);
+        }
+    });
+
+    console.error('\n\nFile .env.deploy was created, update file with the necessary environment variables and call deployit again\n\n');
+    process.exit(1);
+    }
+
+    // check for missing api key
+    if (!process.env.API_KEY_DEPLOY) {
+        console.error('\n\nAPI_KEY_DEPLOY is required to deploy to the remote server.  Update .env.deploy to include a key!\n\n');
         process.exit(1);
     }
 
@@ -148,10 +177,11 @@ async function main() {
         "Internal Port": port,
         "External Port": 443,
         // protocol: 'https',
-        "Persistent Storage Location": '/data',
+        "Persistent Storage": '/data',
+        "Storage Size": envVars['STORAGE_DEPLOY'] || "1Gi",
         "Project Type": projectType,
     }
-    console.log('\n');
+    console.log(`\nDeployz v${package.version}\n`);
     console.table(infoBlock)
     console.log('\nDeploying \x1b[32m%s\x1b[0m to host \x1b[32m%s\x1b[0m  (internal server port \x1b[32m%s\x1b[0m) - %s project type\n', name, host, port, projectType);
 
@@ -248,7 +278,7 @@ spec:
     - ReadWriteOnce
   resources:
     requests:
-      storage: 5Gi`;
+      storage: ${envVars['HOST_DEPLOY'] || '1Gi'}`;
             return pvcYaml;
         }
 
