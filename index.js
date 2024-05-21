@@ -63,28 +63,28 @@ async function main() {
 
     if (!projectType) {
         // check for php files
-        if (fs.existsSync(rootFolder, './index.php')) {
+        if (fs.existsSync(Path.join(rootFolder, './index.php'))) {
             entryPointFolder = './';
             projectType = 'php';
         }
-        if (fs.existsSync(rootFolder, './artisan')) {
+        if (fs.existsSync(Path.join(rootFolder, './artisan'))) {
             entryPointFolder = './';
             projectType = 'php';
         }
 
-        if (fs.existsSync(rootFolder, './composer.json')) {
+        if (fs.existsSync(Path.join(rootFolder, './composer.json'))) {
             entryPointFolder = './';
             projectType = 'php';
         }
         if (!projectType) {
-            if (fs.existsSync(rootFolder, './public/index.php')) {
+            if (fs.existsSync(Path.join(rootFolder, './public/index.php'))) {
                 projectType = 'php';
                 entryPointFolder = './public';
             }
         }
 
         if (!projectType) {
-            if (fs.existsSync(rootFolder, './src/index.php')) {
+            if (fs.existsSync(Path.join(rootFolder, './src/index.php'))) {
                 projectType = 'php';
                 entryPointFolder = './src';
             }
@@ -143,12 +143,13 @@ async function main() {
 
 
     const infoBlock = {
-        publicAddress: `https://${host}`,
-        serverName: name,
-        internalPort: port,
-        externalPort: 443,
-        protocol: 'https',
-        projectType,
+        "Public Address": `https://${host}`,
+        "Server Name": name,
+        "Internal Port": port,
+        "External Port": 443,
+        // protocol: 'https',
+        "Persistent Storage Location": '/data',
+        "Project Type": projectType,
     }
     console.log('\n');
     console.table(infoBlock)
@@ -206,6 +207,7 @@ async function main() {
                             console.log(`child process exited with code ${code}`);
                             if (code === 0) {
                                 const deployYaml = createDeployYaml(name, host, port);
+                                const pvcYaml = createPvcYaml(name);
 
                                 fetch('http://k8s1.audent.ai:8129/deploy', {
                                     method: 'POST',
@@ -213,7 +215,7 @@ async function main() {
                                         'Authorization': `Bearer ${process.env.API_KEY_DEPLOY}`,
                                         'Content-Type': 'application/json'
                                     },
-                                    body: JSON.stringify({ yaml: deployYaml })
+                                    body: JSON.stringify({ yaml: deployYaml, pvcYaml: pvcYaml })
                                 })
                                     .then(response => response.text())
                                     .then(body => {
@@ -235,6 +237,20 @@ async function main() {
                 });
             }
         });
+
+        function createPvcYaml(nameOfYourServer) {
+            const pvcYaml = `apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: ${nameOfYourServer}-data-volume-claim
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 5Gi`;
+            return pvcYaml;
+        }
 
 
         function createDeployYaml(nameOfYourServer, hostName, portYourServerRunsOn) {
@@ -260,6 +276,13 @@ spec:
         - containerPort: ${portYourServerRunsOn}
           name: http
           protocol: TCP
+        volumeMounts:
+        - name: data-volume
+          mountPath: /data
+      volumes:
+      - name: data-volume
+        persistentVolumeClaim:
+          claimName:  ${nameOfYourServer}-data-volume-claim
 
 ---
 apiVersion: v1
@@ -471,6 +494,9 @@ USER nobody
 
 # Expose the port nginx is reachable on
 EXPOSE 8080
+
+# add a persistent volume for app use
+VOLUME [ "/data" ]
 
 # Let supervisord start nginx & php-fpm
 CMD ["/usr/bin/supervisord", "-c", "/etc/supervisor/conf.d/supervisord.conf"]
